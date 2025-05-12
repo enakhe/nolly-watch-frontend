@@ -2,11 +2,15 @@ import { Play, Star, ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import MovieCard from '../components/MovieCard';
 import { useGetActorsQuery, useGetMovieGenresQuery, useGetMoviesWithFilteringQuery, useGetPopularMovieQuery } from '../api/movieSlice';
-import { baseImageUrl, Genre, Movie } from '../constant';
+import { Actor, baseImageUrl, Genre, Movie } from '../constant';
+import { useEffect, useState } from 'react';
 
 const Home = () => {
 
-	const [actorStep, setActorStep]
+	const [movies, setMovies] = useState<Movie[]>([]);
+	const [celebrities, setCelebrities] = useState<Actor[]>([]);
+	const [actorStep, setActorStep] = useState(1);
+	const [moviesPage, setMoviesPage] = useState(1);
 
 	const {
 		data: popularMovies,
@@ -14,7 +18,9 @@ const Home = () => {
 
 	const {
 		data: moviesData,
-	} = useGetMoviesWithFilteringQuery();
+	} = useGetMoviesWithFilteringQuery({
+		pageNumber: moviesPage
+	});
 
 	const {
 		data: genreData,
@@ -22,15 +28,42 @@ const Home = () => {
 
 	const {
 		data: actorData,
+		isFetching
 	} = useGetActorsQuery({
-		pageNumber: '1'
+		pageNumber: actorStep
 	});
 
-	const featuredMovie = popularMovies?.results[0];
+	const featuredMovie = popularMovies?.results[10];
 
-	const celebrities = actorData?.results;
+	useEffect(() => {
+		if (moviesData?.results) {
+			setMovies((prevMovies) => [...prevMovies, ...moviesData.results]);
+		}
+	}, [moviesData]);
 
-	const movies = moviesData?.results;
+	useEffect(() => {
+		if (actorData?.results) {
+			setCelebrities((prevCelebrities) => {
+				const newCelebrities = actorData.results.filter(
+					(actor) => !prevCelebrities.some((prev) => prev.id === actor.id)
+				);
+				return [...prevCelebrities, ...newCelebrities];
+			});
+		}
+	}, [actorData]);
+
+	const handleNextPage = () => {
+		if (actorStep < (actorData?.total_pages || 1)) {
+			setActorStep((prevStep) => prevStep + 1);
+		}
+	};
+
+	const handlePreviousPage = () => {
+		if (actorStep > 1) {
+			setActorStep((prevStep) => prevStep - 1);
+		}
+	};
+
 
 	const containerVariants = {
 		hidden: { opacity: 0 },
@@ -62,8 +95,6 @@ const Home = () => {
 			.filter((name): name is string => name !== null);
 	}
 
-	function takeStepForActors()
-
 	return (
 		<div className="pt-16">
 			{/* Hero Section */}
@@ -83,7 +114,7 @@ const Home = () => {
 					initial={{ opacity: 0, y: 50 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.5, duration: 0.8 }}
-					className="absolute bottom-10 left-10 p-8 max-w-2xl glass-container"
+					className="absolute bottom-10 lg:left-10 left-0 p-8 max-w-2xl glass-container"
 				>
 					<h1 className="text-4xl font-bold mb-4 gradient-text">{featuredMovie?.title}</h1>
 					<p className="text-lg mb-6">{featuredMovie?.overview}</p>
@@ -115,10 +146,18 @@ const Home = () => {
 						<h2 className="text-2xl font-bold">Most Popular Celebrities</h2>
 					</div>
 					<div className="flex items-center space-x-4">
-						<button className="p-2 rounded-full hover:bg-white/10 transition-colors" title="Previous">
+						<button
+							className="p-2 rounded-full hover:bg-white/10 transition-colors"
+							title="Previous"
+							onClick={handlePreviousPage}
+                        	disabled={actorStep === 1 || isFetching}>
 							<ChevronLeft className="w-6 h-6" />
 						</button>
-						<button className="p-2 rounded-full hover:bg-white/10 transition-colors" title="Next">
+						<button
+							className="p-2 rounded-full hover:bg-white/10 transition-colors"
+							title="Next"
+							onClick={handleNextPage}
+							disabled={actorStep >= (actorData?.total_pages || 1) || isFetching}>
 							<ChevronRight className="w-6 h-6" />
 						</button>
 					</div>
@@ -186,6 +225,11 @@ const Home = () => {
 						))}
 					</div>
 				</motion.div>
+				<div className='flex my-8 justify-center items-center'>
+					<button className="primary-button pulsing" onClick={() => setMoviesPage((prevPage) => prevPage + 1)}>
+						Load more
+					</button>
+				</div>
 			</section>
 
 			{/* CTA Section */}

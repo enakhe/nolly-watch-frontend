@@ -36,9 +36,9 @@ export const movieApiSlice = createApi({
 
     tagTypes: ["Movie"],
     endpoints: builder => ({
-        getMoviesWithFiltering: builder.query<MovieResponse, void>({
-            query: () => ({
-                url: "/discover/movie?include_adult=false&include_video=true&language=en-US&page=10&sort_by=popularity.desc",
+        getMoviesWithFiltering: builder.query<MovieResponse, { pageNumber: number }>({
+            query: ({ pageNumber }) => ({
+                url: `/discover/movie?include_adult=false&include_video=true&language=en-US&page=${pageNumber}&sort_by=popularity.desc`,
                 method: "GET",
             }),
         }),
@@ -57,7 +57,7 @@ export const movieApiSlice = createApi({
             })
         }),
 
-        getActors: builder.query<ActorResponse, { pageNumber: string }>({
+        getActors: builder.query<ActorResponse, { pageNumber: number }>({
             query: ({ pageNumber }) => ({
                 url: `/person/popular?language=en-US&page=${pageNumber}`,
                 method: "GET",
