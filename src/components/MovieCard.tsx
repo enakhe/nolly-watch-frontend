@@ -17,6 +17,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
 	rating,
 	genres,
 }) => {
+
 	return (
 		<motion.div
 			whileHover={{ scale: 1.05 }}
