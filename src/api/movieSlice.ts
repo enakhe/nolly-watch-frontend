@@ -36,6 +36,13 @@ export const movieApiSlice = createApi({
 
     tagTypes: ["Movie"],
     endpoints: builder => ({
+        getNowPlayingMovies: builder.query<MovieResponse, void>({
+            query: () => ({
+                url: `movie/now_playing?with_origin_country=NG&region=NG&sort_by=popularity.desc&include_adult=false&include_video=true&language=en-US&page=${1}`,
+                method: "GET",
+            }),
+        }),
+
         getMoviesWithFiltering: builder.query<MovieResponse, { pageNumber: number }>({
             query: ({ pageNumber }) => ({
                 url: `discover/movie?with_origin_country=NG&region=NG&sort_by=popularity.desc&include_adult=false&include_video=true&language=en-US&page=${pageNumber}`,
@@ -43,11 +50,25 @@ export const movieApiSlice = createApi({
             }),
         }),
 
-        getPopularMovie: builder.query<MovieResponse, void>({
-            query: () => ({
-                url: "/movie/popular?language=en-US&page=1&region=NG'",
+        getTvShowsWithFiltering: builder.query<MovieResponse, { pageNumber: number }>({
+            query: ({ pageNumber }) => ({
+                url: `discover/tv?with_origin_country=NG&region=NG&sort_by=popularity.desc&include_adult=false&include_video=true&language=en-US&page=${pageNumber}`,
                 method: "GET",
             }),
+        }),
+
+        getPopularMovie: builder.query<MovieResponse, void>({
+            query: () => ({
+                url: "/discover/movie?region=NG&with_origin_country=NG&sort_by=popularity.desc&include_adult=false&language=en-US&page=1",
+                method: "GET",
+            }),
+        }),
+
+        getUpcomingMovies: builder.query<MovieResponse, { pageNumber: number }>({
+            query: ({ pageNumber }) => ({
+                url: `/movie/upcoming?with_origin_country=NG&region=NG&sort_by=popularity.desc&include_adult=false&include_video=true&language=en-US&page=${pageNumber}`,
+                method: "GET",
+            })
         }),
 
         getMovieGenres: builder.query<GenreResponse, void>({
@@ -67,8 +88,11 @@ export const movieApiSlice = createApi({
 })
 
 export const {
+    useGetNowPlayingMoviesQuery,
     useGetMoviesWithFilteringQuery,
+    useGetTvShowsWithFilteringQuery,
     useGetPopularMovieQuery,
+    useGetUpcomingMoviesQuery,
     useGetMovieGenresQuery,
     useGetActorsQuery
 } = movieApiSlice

@@ -49,5 +49,13 @@ export interface KnownFor {
     video: boolean,
     vote_average: number,
     vote_count: number
+}
 
+export function mapMovieGenres(movie: Movie, genres: Genre[]): string[] {
+    return movie.genre_ids
+        .map(genreId => {
+            const genre = genres.find(g => g.id === genreId);
+            return genre ? genre.name : null;
+        })
+        .filter((name): name is string => name !== null);
 }

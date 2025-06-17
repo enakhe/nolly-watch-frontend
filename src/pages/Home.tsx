@@ -1,26 +1,18 @@
-import { Play, Star, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Star, ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import MovieCard from '../components/MovieCard';
-import { useGetActorsQuery, useGetMovieGenresQuery, useGetMoviesWithFilteringQuery, useGetPopularMovieQuery } from '../api/movieSlice';
-import { Actor, baseImageUrl, Genre, Movie } from '../constant';
+import { useGetActorsQuery, useGetMovieGenresQuery } from '../api/movieSlice';
+import { Actor, baseImageUrl } from '../constant';
 import { useEffect, useState } from 'react';
+import NowPlaying from '../components/NowPlaying';
+import FeaturedMovies from '../components/FeaturedMovies';
+import PopularMovies from '../components/PopularMovies';
+import PopularTvShows from '../components/PopularTvShows';
+import UpcomingMovies from '../components/UpcomingMovies';
 
 const Home = () => {
 
-	const [movies, setMovies] = useState<Movie[]>([]);
 	const [celebrities, setCelebrities] = useState<Actor[]>([]);
 	const [actorStep, setActorStep] = useState(1);
-	const [moviesPage, setMoviesPage] = useState(1);
-
-	const {
-		data: popularMovies,
-	} = useGetPopularMovieQuery();
-
-	const {
-		data: moviesData,
-	} = useGetMoviesWithFilteringQuery({
-		pageNumber: moviesPage
-	});
 
 	const {
 		data: genreData,
@@ -32,14 +24,6 @@ const Home = () => {
 	} = useGetActorsQuery({
 		pageNumber: actorStep
 	});
-
-	const featuredMovie = popularMovies?.results[10];
-
-	useEffect(() => {
-		if (moviesData?.results) {
-			setMovies((prevMovies) => [...prevMovies, ...moviesData.results]);
-		}
-	}, [moviesData]);
 
 	useEffect(() => {
 		if (actorData?.results) {
@@ -86,93 +70,18 @@ const Home = () => {
 		},
 	};
 
-	function mapMovieGenres(movie: Movie, genres: Genre[]): string[] {
-		return movie.genre_ids
-			.map(genreId => {
-				const genre = genres.find(g => g.id === genreId);
-				return genre ? genre.name : null;
-			})
-			.filter((name): name is string => name !== null);
-	}
-
 	return (
 		<div className="pt-16">
-			{/* Hero Section */}
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ duration: 1 }}
-				className="relative h-[70vh]"
-			>
-				<img
-					src={`${baseImageUrl}${featuredMovie?.poster_path}`}
-					alt={featuredMovie?.title}
-					className="w-full h-full object-cover"
-				/>
-				<div className="absolute inset-0 hero-gradient" />
-				<motion.div
-					initial={{ opacity: 0, y: 50 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.5, duration: 0.8 }}
-					className="absolute bottom-10 lg:left-10 left-0 p-8 max-w-2xl glass-container"
-				>
-					<h1 className="text-4xl font-bold mb-4 gradient-text">{featuredMovie?.title}</h1>
-					<p className="text-lg mb-6">{featuredMovie?.overview}</p>
-					<div className="flex space-x-4">
-						<motion.button
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
-							className="primary-button flex items-center"
-						>
-							<Play className="w-5 h-5 mr-2" />
-							Watch Now
-						</motion.button>
-						<motion.button
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
-							className="secondary-button"
-						>
-							More Info
-						</motion.button>
-					</div>
-				</motion.div>
-			</motion.div>
 
-			{/* Popular Movies */}
-			<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.5 }}
-				>
-					<h2 className="text-2xl font-bold mb-6 section-title">Popular Movies</h2>
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-						{movies?.map((movie, index) => (
-							<motion.div
-								key={index}
-								initial={{ opacity: 0, scale: 0.9 }}
-								whileInView={{ opacity: 1, scale: 1 }}
-								viewport={{ once: true }}
-								transition={{ delay: index * 0.1 }}
-							>
-								<MovieCard
-									title={movie.title}
-									posterUrl={`${baseImageUrl}${movie?.poster_path}`}
-									genres={mapMovieGenres(movie, genreData?.genres || [])}
-									year={movie.release_date}
-									rating={movie.popularity}
-									key={index} />
-							</motion.div>
-						))}
-					</div>
-				</motion.div>
-				<div className='flex my-8 justify-center items-center'>
-					<button className="primary-button pulsing" onClick={() => setMoviesPage((prevPage) => prevPage + 1)}>
-						Load more
-					</button>
-				</div>
-			</section>
+			<FeaturedMovies />
+
+			<NowPlaying genres={genreData?.genres} />
+
+			<PopularMovies genres={genreData?.genres} />
+
+			<PopularTvShows genres={genreData?.genres} />
+
+			<UpcomingMovies genres={genreData?.genres} />
 
 			{/* Most Popular Celebrities */}
 			<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

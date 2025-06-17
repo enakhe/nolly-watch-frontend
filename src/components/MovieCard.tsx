@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Plus } from 'lucide-react';
+import { Star, Plus, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface MovieCardProps {
@@ -48,7 +48,15 @@ const MovieCard: React.FC<MovieCardProps> = ({
 					whileTap={{ scale: 0.9 }}
 					className="mt-4 w-full flex items-center justify-center primary-button">
 					<Plus className="w-4 h-4" />
-					<span className='text-sm'>Add to Watchlist</span>
+					<span className='text-sm'>Watchlist</span>
+				</motion.button>
+
+				<motion.button
+					whileHover={{ scale: 1.1 }}
+					whileTap={{ scale: 0.9 }}
+					className="mt-4 w-full flex items-center justify-center primary-button">
+					<Eye className="w-4 h-4 mx-1" />
+					<span className='text-sm'>Details</span>
 				</motion.button>
 			</div>
 		</motion.div>
