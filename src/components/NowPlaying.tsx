@@ -45,6 +45,7 @@ const NowPlaying = ({ genres }: GenreDataProp) => {
                                 genres={mapMovieGenres(movie, genres || [])}
                                 year={movie.release_date}
                                 rating={movie.popularity}
+                                movieId={movie.id}
                                 key={index} />
                         </motion.div>
                     ))}

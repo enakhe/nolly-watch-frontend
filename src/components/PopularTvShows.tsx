@@ -48,6 +48,7 @@ const PopularTvShows = ({ genres }: GenreDataProp) => {
                                 genres={mapMovieGenres(tvShow, genres || [])}
                                 year={tvShow.release_date}
                                 rating={tvShow.popularity}
+                                movieId={tvShow.id}
                                 key={index} />
                         </motion.div>
                     ))}

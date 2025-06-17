@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, Plus, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 interface MovieCardProps {
 	title: string;
@@ -8,6 +9,7 @@ interface MovieCardProps {
 	year: string;
 	rating: number;
 	genres: string[];
+	movieId?: number; // Add movieId prop for navigation
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({
@@ -16,7 +18,19 @@ const MovieCard: React.FC<MovieCardProps> = ({
 	year,
 	rating,
 	genres,
+	movieId = 1487983, // Default to sample movie ID
 }) => {
+	const navigate = useNavigate();
+
+	const handleDetailsClick = () => {
+		navigate(`/movie/${movieId}`);
+	};
+
+	const handleWatchlistClick = (e: React.MouseEvent) => {
+		e.stopPropagation(); // Prevent navigation when clicking watchlist
+		// Add to watchlist logic here
+		console.log('Added to watchlist:', title);
+	};
 
 	return (
 		<motion.div
@@ -46,6 +60,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
 				<motion.button
 					whileHover={{ scale: 1.1 }}
 					whileTap={{ scale: 0.9 }}
+					onClick={handleWatchlistClick}
 					className="mt-4 w-full flex items-center justify-center primary-button">
 					<Plus className="w-4 h-4" />
 					<span className='text-sm'>Watchlist</span>
@@ -54,7 +69,8 @@ const MovieCard: React.FC<MovieCardProps> = ({
 				<motion.button
 					whileHover={{ scale: 1.1 }}
 					whileTap={{ scale: 0.9 }}
-					className="mt-4 w-full flex items-center justify-center primary-button">
+					onClick={handleDetailsClick}
+					className="mt-2 w-full flex items-center justify-center secondary-button">
 					<Eye className="w-4 h-4 mx-1" />
 					<span className='text-sm'>Details</span>
 				</motion.button>
