@@ -12,7 +12,6 @@ const Header = () => {
 		{ name: 'Home', path: '/' },
 		{ name: 'Movies', path: '/movies' },
 		{ name: 'TV Shows', path: '/tv-shows' },
-		{ name: 'Awards & Events', path: '/awards' },
 		{ name: 'Actors', path: '/actors' },
 	];
 
@@ -112,8 +111,8 @@ const Header = () => {
 								key={item.name}
 								to={item.path}
 								className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300 ${location.pathname === item.path
-										? 'text-primary bg-white/10'
-										: 'text-text hover:bg-white/10'
+									? 'text-primary bg-white/10'
+									: 'text-text hover:bg-white/10'
 									}`}
 								onClick={() => setIsMenuOpen(false)}
 							>

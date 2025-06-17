@@ -38,28 +38,28 @@ export const movieApiSlice = createApi({
     endpoints: builder => ({
         getMoviesWithFiltering: builder.query<MovieResponse, { pageNumber: number }>({
             query: ({ pageNumber }) => ({
-                url: `/discover/movie?include_adult=false&include_video=true&language=en-US&page=${pageNumber}&sort_by=popularity.desc`,
+                url: `discover/movie?with_origin_country=NG&region=NG&sort_by=popularity.desc&include_adult=false&include_video=true&language=en-US&page=${pageNumber}`,
                 method: "GET",
             }),
         }),
 
         getPopularMovie: builder.query<MovieResponse, void>({
             query: () => ({
-                url: "/movie/popular?language=en-US&page=1",
+                url: "/movie/popular?language=en-US&page=1&region=NG'",
                 method: "GET",
             }),
         }),
 
         getMovieGenres: builder.query<GenreResponse, void>({
             query: () => ({
-                url: "/genre/movie/list?language=en",
+                url: "/genre/movie/list?with_origin_country=NG&region=NG&language=en",
                 method: "GET",
             })
         }),
 
         getActors: builder.query<ActorResponse, { pageNumber: number }>({
             query: ({ pageNumber }) => ({
-                url: `/person/popular?language=en-US&page=${pageNumber}`,
+                url: `/person/popular?with_origin_country=NG&region=NG&language=en-US&page=${pageNumber}`,
                 method: "GET",
             })
         })
