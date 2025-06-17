@@ -11,17 +11,55 @@ const FeaturedMovies = () => {
     
     const {
         data: popularMovies,
+        isLoading,
+        error
     } = useGetPopularMovieQuery();
     
-    const featuredMovie = popularMovies?.results[10];
+    const featuredMovie = popularMovies?.results?.[10];
 
     const handleWatchNow = () => {
+        console.log('Watch Now clicked!'); // Debug log
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
+        console.log('Closing modal'); // Debug log
         setIsModalOpen(false);
     };
+
+    // Show loading state
+    if (isLoading) {
+        return (
+            <div className="relative h-[70vh] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+                    <p className="mt-4 text-text-secondary">Loading featured movie...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="relative h-[70vh] flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-400">Error loading featured movie</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show fallback if no movie data
+    if (!featuredMovie) {
+        return (
+            <div className="relative h-[70vh] flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-text-secondary">No featured movie available</p>
+                </div>
+            </div>
+        );
+    }
     
     return (
         <>

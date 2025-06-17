@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, Star, Calendar, Clock, Users } from 'lucide-react';
+import { X, Play, Star, Calendar, Users } from 'lucide-react';
 import { Movie, baseImageUrl } from '../constant';
 
 interface WatchNowModalProps {
@@ -10,7 +10,12 @@ interface WatchNowModalProps {
 }
 
 const WatchNowModal: React.FC<WatchNowModalProps> = ({ isOpen, onClose, movie }) => {
-  if (!movie) return null;
+  console.log('Modal render:', { isOpen, movie: movie?.title }); // Debug log
+
+  if (!movie) {
+    console.log('No movie data available');
+    return null;
+  }
 
   // Mock trailer URL - in a real app, you'd get this from your API
   const trailerUrl = `https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1`;
@@ -53,6 +58,11 @@ const WatchNowModal: React.FC<WatchNowModalProps> = ({ isOpen, onClose, movie })
     }
   };
 
+  const handleCloseClick = () => {
+    console.log('Close button clicked');
+    onClose();
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -74,7 +84,7 @@ const WatchNowModal: React.FC<WatchNowModalProps> = ({ isOpen, onClose, movie })
           >
             {/* Close Button */}
             <button
-              onClick={onClose}
+              onClick={handleCloseClick}
               className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors duration-200"
             >
               <X className="w-6 h-6 text-white" />
