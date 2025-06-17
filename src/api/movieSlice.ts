@@ -19,6 +19,13 @@ interface ActorResponse {
     total_results: number
 }
 
+interface SearchResponse {
+    page: number,
+    results: Movie[],
+    total_pages: number,
+    total_results: number
+}
+
 const accessToken = import.meta.env.VITE_TMDB_READ_ACCESS_TOKEN;
 
 export const movieApiSlice = createApi({
@@ -83,7 +90,14 @@ export const movieApiSlice = createApi({
                 url: `/person/popular?with_origin_country=NG&region=NG&language=en-US&page=${pageNumber}`,
                 method: "GET",
             })
-        })
+        }),
+
+        searchMovies: builder.query<SearchResponse, { query: string; page?: number }>({
+            query: ({ query, page = 1 }) => ({
+                url: `/search/movie?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=${page}`,
+                method: "GET",
+            }),
+        }),
     })
 })
 
@@ -94,5 +108,7 @@ export const {
     useGetPopularMovieQuery,
     useGetUpcomingMoviesQuery,
     useGetMovieGenresQuery,
-    useGetActorsQuery
+    useGetActorsQuery,
+    useSearchMoviesQuery,
+    useLazySearchMoviesQuery
 } = movieApiSlice
