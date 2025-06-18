@@ -25,7 +25,6 @@ const Header = () => {
 		{ name: 'Home', path: '/' },
 		{ name: 'Movies', path: '/movies' },
 		{ name: 'TV Shows', path: '/tv-shows' },
-		{ name: 'Actors', path: '/actors' },
 	];
 
 	useEffect(() => {
@@ -120,7 +119,7 @@ const Header = () => {
 							>
 								<Search className="w-5 h-5" />
 							</button>
-							
+
 							{/* Desktop Search Dropdown */}
 							{isSearchOpen && (
 								<div className="absolute right-0 top-full mt-2 w-80">
@@ -135,7 +134,7 @@ const Header = () => {
 											className="w-full input-field pl-10 pr-4"
 										/>
 										<Search className="absolute left-3 top-2.5 w-5 h-5 text-text-secondary" />
-										
+
 										<SearchDropdown
 											isOpen={shouldShowDropdown}
 											searchResults={searchResults?.results || []}
@@ -147,7 +146,7 @@ const Header = () => {
 								</div>
 							)}
 						</div>
-						
+
 						<Link to="/signin" className="secondary-button">
 							Sign In
 						</Link>
@@ -192,7 +191,7 @@ const Header = () => {
 								className="w-full input-field pl-10"
 							/>
 							<Search className="absolute left-3 top-2.5 w-5 h-5 text-text-secondary" />
-							
+
 							<SearchDropdown
 								isOpen={shouldShowDropdown}
 								searchResults={searchResults?.results || []}

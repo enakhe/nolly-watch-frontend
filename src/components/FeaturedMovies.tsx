@@ -1,21 +1,27 @@
 import { baseImageUrl } from '../constant'
 import { motion } from 'framer-motion';
 import { Play } from 'lucide-react'
-import { useGetPopularMovieQuery } from '../api/movieSlice';
+import { useGetMovieByIdQuery, useGetPopularMovieQuery } from '../api/movieSlice';
 import { useState } from 'react';
 import WatchNowModal from './WatchNowModal';
 
 
 const FeaturedMovies = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+
     const {
         data: popularMovies,
         isLoading,
         error
     } = useGetPopularMovieQuery();
-    
+
     const featuredMovie = popularMovies?.results?.[10];
+
+    const {
+        data: movie,
+    } = useGetMovieByIdQuery({
+        movieId: featuredMovie?.id || 0
+    });
 
     const handleWatchNow = () => {
         console.log('Watch Now clicked!'); // Debug log
@@ -60,7 +66,7 @@ const FeaturedMovies = () => {
             </div>
         );
     }
-    
+
     return (
         <>
             <motion.div
@@ -105,10 +111,10 @@ const FeaturedMovies = () => {
                 </motion.div>
             </motion.div>
 
-            <WatchNowModal 
+            <WatchNowModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                movie={featuredMovie}
+                movie={movie}
             />
         </>
     )
