@@ -1,19 +1,51 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { useRegisterMutation } from '../api/userSlice';
+import { useAppDispatch } from '../app/hooks';
+import { setCredentials } from '../features/auth/authSlice';
 
 const SignUp = () => {
   const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [register, { isLoading, error }] = useRegisterMutation();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign up logic here
+    
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    try {
+      const result = await register({
+        fullName,
+        username,
+        email,
+        password
+      }).unwrap();
+      
+      // Store credentials in Redux and localStorage
+      dispatch(setCredentials({
+        user: result.user,
+        token: result.token
+      }));
+      
+      // Navigate to home page
+      navigate('/');
+    } catch (err) {
+      console.error('Registration failed:', err);
+    }
   };
 
   return (
@@ -28,6 +60,14 @@ const SignUp = () => {
 
         <div className="bg-background/50 p-8 rounded-lg backdrop-blur-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                <p className="text-red-400 text-sm">
+                  {'data' in error ? (error.data as any)?.message || 'Registration failed' : 'Registration failed'}
+                </p>
+              </div>
+            )}
+
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium mb-2">
                 Full Name
@@ -40,6 +80,24 @@ const SignUp = () => {
                   onChange={(e) => setFullName(e.target.value)}
                   className="w-full bg-background border border-white/20 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:border-primary"
                   placeholder="Enter your full name"
+                  required
+                />
+                <User className="absolute left-3 top-2.5 w-5 h-5 text-text-secondary" />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium mb-2">
+                Username
+              </label>
+              <div className="relative">
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full bg-background border border-white/20 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:border-primary"
+                  placeholder="Choose a username"
                   required
                 />
                 <User className="absolute left-3 top-2.5 w-5 h-5 text-text-secondary" />
@@ -143,8 +201,12 @@ const SignUp = () => {
               </label>
             </div>
 
-            <button type="submit" className="w-full primary-button py-2">
-              Create Account
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full primary-button py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 

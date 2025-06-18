@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, Menu, X, User, LogOut } from 'lucide-react';
 import { useLazySearchMoviesQuery } from '../api/movieSlice';
+import { useGetUserProfileQuery } from '../api/userSlice';
+import { useAppSelector, useAppDispatch } from '../app/hooks';
+import { logout } from '../features/auth/authSlice';
 import SearchDropdown from './SearchDropdown';
 import { useDebounce } from '../hooks/useDebounce';
 
@@ -11,9 +14,20 @@ const Header = () => {
 	const [isScrolled, setIsScrolled] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [isSearchFocused, setIsSearchFocused] = useState(false);
+	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 	const location = useLocation();
+	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
 	const searchRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
+	const userMenuRef = useRef<HTMLDivElement>(null);
+
+	const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
+	// Only fetch user profile if authenticated
+	const { data: userProfile } = useGetUserProfileQuery(undefined, {
+		skip: !isAuthenticated,
+	});
 
 	// Debounce search query to avoid too many API calls
 	const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -50,6 +64,9 @@ const Header = () => {
 				setIsSearchFocused(false);
 				setIsSearchOpen(false);
 			}
+			if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+				setIsUserMenuOpen(false);
+			}
 		};
 
 		document.addEventListener('mousedown', handleClickOutside);
@@ -83,7 +100,15 @@ const Header = () => {
 		setSearchQuery('');
 	};
 
+	const handleLogout = () => {
+		dispatch(logout());
+		setIsUserMenuOpen(false);
+		navigate('/');
+	};
+
 	const shouldShowDropdown = isSearchFocused && (searchQuery.length > 0 || isSearchLoading);
+
+	const currentUser = userProfile?.user || user;
 
 	return (
 		<header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'glass py-4' : 'bg-transparent py-3'
@@ -147,12 +172,58 @@ const Header = () => {
 							)}
 						</div>
 
-						<Link to="/signin" className="secondary-button">
-							Sign In
-						</Link>
-						<Link to="/signup" className="primary-button pulsing">
-							Sign Up
-						</Link>
+						{/* Authentication Section */}
+						{isAuthenticated && currentUser ? (
+							<div className="relative" ref={userMenuRef}>
+								<button
+									onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+									className="flex items-center space-x-2 p-2 hover:bg-white/10 rounded-full transition-colors duration-300"
+								>
+									{currentUser.profilePicture ? (
+										<img
+											src={currentUser.profilePicture}
+											alt={currentUser.fullName}
+											className="w-8 h-8 rounded-full object-cover"
+										/>
+									) : (
+										<div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+											<User className="w-4 h-4" />
+										</div>
+									)}
+									<span className="text-sm font-medium">{currentUser.fullName}</span>
+								</button>
+
+								{/* User Dropdown Menu */}
+								{isUserMenuOpen && (
+									<div className="absolute right-0 top-full mt-2 w-48 glass rounded-lg shadow-lg py-2">
+										<Link
+											to="/profile"
+											className="flex items-center px-4 py-2 text-sm hover:bg-white/10 transition-colors"
+											onClick={() => setIsUserMenuOpen(false)}
+										>
+											<User className="w-4 h-4 mr-2" />
+											Profile
+										</Link>
+										<button
+											onClick={handleLogout}
+											className="flex items-center w-full px-4 py-2 text-sm hover:bg-white/10 transition-colors text-left"
+										>
+											<LogOut className="w-4 h-4 mr-2" />
+											Sign Out
+										</button>
+									</div>
+								)}
+							</div>
+						) : (
+							<>
+								<Link to="/signin" className="secondary-button">
+									Sign In
+								</Link>
+								<Link to="/signup" className="primary-button pulsing">
+									Sign Up
+								</Link>
+							</>
+						)}
 					</div>
 
 					{/* Mobile menu button */}
@@ -221,20 +292,44 @@ const Header = () => {
 								{item.name}
 							</Link>
 						))}
-						<Link
-							to="/signin"
-							className="block px-3 py-2 text-base font-medium text-text hover:bg-white/10 rounded-md transition-colors duration-300"
-							onClick={() => setIsMenuOpen(false)}
-						>
-							Sign In
-						</Link>
-						<Link
-							to="/signup"
-							className="block px-3 py-2 text-base font-medium text-primary hover:bg-white/10 rounded-md transition-colors duration-300"
-							onClick={() => setIsMenuOpen(false)}
-						>
-							Sign Up
-						</Link>
+						
+						{isAuthenticated && currentUser ? (
+							<>
+								<Link
+									to="/profile"
+									className="block px-3 py-2 text-base font-medium text-text hover:bg-white/10 rounded-md transition-colors duration-300"
+									onClick={() => setIsMenuOpen(false)}
+								>
+									Profile
+								</Link>
+								<button
+									onClick={() => {
+										handleLogout();
+										setIsMenuOpen(false);
+									}}
+									className="block w-full text-left px-3 py-2 text-base font-medium text-text hover:bg-white/10 rounded-md transition-colors duration-300"
+								>
+									Sign Out
+								</button>
+							</>
+						) : (
+							<>
+								<Link
+									to="/signin"
+									className="block px-3 py-2 text-base font-medium text-text hover:bg-white/10 rounded-md transition-colors duration-300"
+									onClick={() => setIsMenuOpen(false)}
+								>
+									Sign In
+								</Link>
+								<Link
+									to="/signup"
+									className="block px-3 py-2 text-base font-medium text-primary hover:bg-white/10 rounded-md transition-colors duration-300"
+									onClick={() => setIsMenuOpen(false)}
+								>
+									Sign Up
+								</Link>
+							</>
+						)}
 					</div>
 				</div>
 			)}

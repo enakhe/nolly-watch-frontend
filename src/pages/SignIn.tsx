@@ -1,16 +1,37 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useLoginMutation } from '../api/userSlice';
+import { useAppDispatch } from '../app/hooks';
+import { setCredentials } from '../features/auth/authSlice';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [login, { isLoading, error }] = useLoginMutation();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign in logic here
+    
+    try {
+      const result = await login({ email, password }).unwrap();
+      
+      // Store credentials in Redux and localStorage
+      dispatch(setCredentials({
+        user: result.user,
+        token: result.token
+      }));
+      
+      // Navigate to home page
+      navigate('/');
+    } catch (err) {
+      console.error('Login failed:', err);
+    }
   };
 
   return (
@@ -25,6 +46,14 @@ const SignIn = () => {
 
         <div className="bg-background/50 p-8 rounded-lg backdrop-blur-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                <p className="text-red-400 text-sm">
+                  {'data' in error ? (error.data as any)?.message || 'Login failed' : 'Login failed'}
+                </p>
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-2">
                 Email Address
@@ -90,8 +119,12 @@ const SignIn = () => {
               </Link>
             </div>
 
-            <button type="submit" className="w-full primary-button py-2">
-              Sign In
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full primary-button py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 

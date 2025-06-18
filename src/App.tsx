@@ -9,6 +9,7 @@ import Awards from './pages/Awards';
 import Actors from './pages/Actors';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
+import Profile from './pages/Profile';
 import MovieDetails from './pages/MovieDetails';
 import SearchResults from './pages/SearchResults';
 
@@ -26,6 +27,7 @@ function App() {
             <Route path="/actors" element={<Actors />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/movie/:id" element={<MovieDetails />} />
             <Route path="/search" element={<SearchResults />} />
           </Routes>

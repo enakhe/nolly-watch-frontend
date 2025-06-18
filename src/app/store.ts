@@ -2,9 +2,10 @@ import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { movieApiSlice } from "../api/movieSlice";
+import { userApiSlice } from "../api/userSlice";
+import { authSlice } from "../features/auth/authSlice";
 
-
-const rootReducer = combineSlices(movieApiSlice);
+const rootReducer = combineSlices(movieApiSlice, userApiSlice, authSlice);
 
 export type RootState = ReturnType<typeof rootReducer>;
 
@@ -12,7 +13,10 @@ export const makeStore = (preloadedState?: Partial<RootState>) => {
     const store = configureStore({
         reducer: rootReducer,
         middleware: getDefaultMiddleware => {
-            return getDefaultMiddleware().concat(movieApiSlice.middleware);
+            return getDefaultMiddleware().concat(
+                movieApiSlice.middleware,
+                userApiSlice.middleware
+            );
         },
         preloadedState,
     });
