@@ -12,6 +12,8 @@ import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
 import MovieDetails from './pages/MovieDetails';
 import SearchResults from './pages/SearchResults';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/movie/:id" element={<MovieDetails />} />
             <Route path="/search" element={<SearchResults />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
           </Routes>
         </main>
         <Footer />
