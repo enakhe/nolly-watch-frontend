@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
-const baseUrl = import.meta.env.VITE_BACKEND_API_URL || "https://nolly-watch-backend.vercel.app/api"
+const baseUrl = "https://nolly-watch-backend.vercel.app/api"
 
 export interface User {
     _id: string
