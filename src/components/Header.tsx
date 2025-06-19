@@ -128,8 +128,7 @@ const Header = () => {
 								key={item.name}
 								to={item.path}
 								className={`nav-link text-sm font-medium ${location.pathname === item.path ? 'text-primary' : 'text-text'
-									}`}
-							>
+									}`}>
 								{item.name}
 							</Link>
 						))}
