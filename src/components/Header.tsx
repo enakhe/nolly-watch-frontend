@@ -108,7 +108,7 @@ const Header = () => {
 
 	const shouldShowDropdown = isSearchFocused && (searchQuery.length > 0 || isSearchLoading);
 
-	const currentUser = userProfile?.user || user;
+	const currentUser = userProfile || user;
 
 	return (
 		<header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'glass py-4' : 'bg-transparent py-3'
@@ -179,10 +179,10 @@ const Header = () => {
 									onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
 									className="flex items-center space-x-2 p-2 hover:bg-white/10 rounded-full transition-colors duration-300"
 								>
-									{currentUser.profilePicture ? (
+									{('profilePicture' in currentUser ? currentUser.profilePicture : currentUser.user?.profilePicture) ? (
 										<img
-											src={currentUser.profilePicture}
-											alt={currentUser.fullName}
+											src={'profilePicture' in currentUser ? currentUser.profilePicture : currentUser.user?.profilePicture}
+											alt={'fullName' in currentUser ? currentUser.fullName : currentUser.user?.fullName}
 											className="w-8 h-8 rounded-full object-cover"
 										/>
 									) : (
@@ -190,7 +190,7 @@ const Header = () => {
 											<User className="w-4 h-4" />
 										</div>
 									)}
-									<span className="text-sm font-medium">{currentUser.fullName}</span>
+									<span className="text-sm font-medium">{'fullName' in currentUser ? currentUser.fullName : currentUser.user?.fullName}</span>
 								</button>
 
 								{/* User Dropdown Menu */}
