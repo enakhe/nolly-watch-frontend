@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
-const baseUrl = import.meta.env.VITE_BACKEND_API_URL || "https://nolly-watch-backend.vercel.app/api/users"
+const baseUrl = import.meta.env.VITE_BACKEND_API_URL || "https://nolly-watch-backend.vercel.app/api"
 
 export interface User {
     _id: string
@@ -41,6 +41,19 @@ export interface Watchlist {
     updatedAt: string
 }
 
+export interface WatchlistWithMovies {
+    _id: string
+    name: string
+    description?: string
+    movies: {
+        movieId: number
+        addedAt: string
+    }[]
+    user: string
+    createdAt: string
+    updatedAt: string
+}
+
 export interface CreateWatchlistRequest {
     name: string
     description?: string
@@ -49,6 +62,16 @@ export interface CreateWatchlistRequest {
 export interface AddToWatchlistRequest {
     watchlistId: string
     movieId: number
+}
+
+export interface RemoveFromWatchlistRequest {
+    watchlistId: string
+    movieId: number
+}
+
+export interface UpdateWatchlistNameRequest {
+    watchlistId: string
+    name: string
 }
 
 export const userApiSlice = createApi({
@@ -65,9 +88,10 @@ export const userApiSlice = createApi({
     }),
     tagTypes: ["User", "Watchlist"],
     endpoints: (builder) => ({
+        // Auth endpoints
         register: builder.mutation<AuthResponse, RegisterRequest>({
             query: (userData) => ({
-                url: '/register',
+                url: '/users/register',
                 method: 'POST',
                 body: userData,
             }),
@@ -76,7 +100,7 @@ export const userApiSlice = createApi({
 
         login: builder.mutation<AuthResponse, LoginRequest>({
             query: (credentials) => ({
-                url: '/login',
+                url: '/users/login',
                 method: 'POST',
                 body: credentials,
             }),
@@ -84,24 +108,39 @@ export const userApiSlice = createApi({
         }),
 
         getUserProfile: builder.query<{ user: User }, void>({
-            query: () => '/get-profile',
+            query: () => '/users/get-profile',
             providesTags: ["User"],
         }),
 
         getUserById: builder.query<{ user: User }, string>({
-            query: (id) => `/${id}`,
+            query: (id) => `/users/${id}`,
             providesTags: ["User"],
         }),
 
-        // Watchlist endpoints (assuming they exist on your backend)
+        // Watchlist endpoints
         getWatchlists: builder.query<{ watchlists: Watchlist[] }, void>({
-            query: () => '/watchlists',
+            query: () => '/watchlist',
+            providesTags: ["Watchlist"],
+        }),
+
+        getWatchlistsWithMovies: builder.query<{ watchlists: WatchlistWithMovies[] }, void>({
+            query: () => '/watchlist/with-movies',
+            providesTags: ["Watchlist"],
+        }),
+
+        getWatchlistById: builder.query<{ watchlist: Watchlist }, string>({
+            query: (id) => `/watchlist/${id}`,
+            providesTags: ["Watchlist"],
+        }),
+
+        getMoviesInWatchlist: builder.query<{ movies: number[] }, string>({
+            query: (id) => `/watchlist/movies/${id}`,
             providesTags: ["Watchlist"],
         }),
 
         createWatchlist: builder.mutation<{ watchlist: Watchlist }, CreateWatchlistRequest>({
             query: (watchlistData) => ({
-                url: '/watchlists',
+                url: '/watchlist/create',
                 method: 'POST',
                 body: watchlistData,
             }),
@@ -110,16 +149,34 @@ export const userApiSlice = createApi({
 
         addToWatchlist: builder.mutation<{ message: string }, AddToWatchlistRequest>({
             query: ({ watchlistId, movieId }) => ({
-                url: `/watchlists/${watchlistId}/movies`,
+                url: '/watchlist/add-movie',
                 method: 'POST',
-                body: { movieId },
+                body: { watchlistId, movieId },
             }),
             invalidatesTags: ["Watchlist"],
         }),
 
-        removeFromWatchlist: builder.mutation<{ message: string }, AddToWatchlistRequest>({
+        removeFromWatchlist: builder.mutation<{ message: string }, RemoveFromWatchlistRequest>({
             query: ({ watchlistId, movieId }) => ({
-                url: `/watchlists/${watchlistId}/movies/${movieId}`,
+                url: '/watchlist/remove-movie',
+                method: 'POST',
+                body: { watchlistId, movieId },
+            }),
+            invalidatesTags: ["Watchlist"],
+        }),
+
+        updateWatchlistName: builder.mutation<{ watchlist: Watchlist }, UpdateWatchlistNameRequest>({
+            query: ({ watchlistId, name }) => ({
+                url: `/watchlist/update-name/${watchlistId}`,
+                method: 'PUT',
+                body: { name },
+            }),
+            invalidatesTags: ["Watchlist"],
+        }),
+
+        deleteWatchlist: builder.mutation<{ message: string }, string>({
+            query: (watchlistId) => ({
+                url: `/watchlist/delete/${watchlistId}`,
                 method: 'DELETE',
             }),
             invalidatesTags: ["Watchlist"],
@@ -133,7 +190,12 @@ export const {
     useGetUserProfileQuery,
     useGetUserByIdQuery,
     useGetWatchlistsQuery,
+    useGetWatchlistsWithMoviesQuery,
+    useGetWatchlistByIdQuery,
+    useGetMoviesInWatchlistQuery,
     useCreateWatchlistMutation,
     useAddToWatchlistMutation,
     useRemoveFromWatchlistMutation,
+    useUpdateWatchlistNameMutation,
+    useDeleteWatchlistMutation,
 } = userApiSlice
