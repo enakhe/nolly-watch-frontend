@@ -131,7 +131,7 @@ export const movieApiSlice = createApi({
 
         searchMovies: builder.query<SearchResponse, { query: string; page?: number }>({
             query: ({ query, page = 1 }) => ({
-                url: `/search/movie?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=${page}`,
+                url: `/search/movie?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=${page}&region=NG&with_origin_country=NG`,
                 method: "GET",
             }),
         }),

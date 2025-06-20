@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Menu, X, User, LogOut } from 'lucide-react';
 import { useLazySearchMoviesQuery } from '../api/movieSlice';
-import { useGetUserProfileQuery } from '../api/userSlice';
 import { useAppSelector, useAppDispatch } from '../app/hooks';
 import { logout } from '../features/auth/authSlice';
 import SearchDropdown from './SearchDropdown';
@@ -23,11 +22,6 @@ const Header = () => {
 	const userMenuRef = useRef<HTMLDivElement>(null);
 
 	const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-
-	// Only fetch user profile if authenticated
-	const { data: userProfile } = useGetUserProfileQuery(undefined, {
-		skip: !isAuthenticated,
-	});
 
 	// Debounce search query to avoid too many API calls
 	const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -60,15 +54,20 @@ const Header = () => {
 	// Handle clicks outside search dropdown
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
-			if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-				setIsSearchFocused(false);
+			if (
+				searchRef.current &&
+				!searchRef.current.contains(event.target as Node)
+			) {
 				setIsSearchOpen(false);
+				setIsSearchFocused(false);
 			}
-			if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+			if (
+				userMenuRef.current &&
+				!userMenuRef.current.contains(event.target as Node)
+			) {
 				setIsUserMenuOpen(false);
 			}
 		};
-
 		document.addEventListener('mousedown', handleClickOutside);
 		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, []);
@@ -108,7 +107,8 @@ const Header = () => {
 
 	const shouldShowDropdown = isSearchFocused && (searchQuery.length > 0 || isSearchLoading);
 
-	const currentUser = userProfile || user;
+	const currentUser = user;
+	console.log('Current User:', currentUser);
 
 	return (
 		<header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'glass py-4' : 'bg-transparent py-3'
@@ -146,18 +146,22 @@ const Header = () => {
 
 							{/* Desktop Search Dropdown */}
 							{isSearchOpen && (
-								<div className="absolute right-0 top-full mt-2 w-80">
+								<div className="absolute right-0 top-full mt-2 w-96">
 									<div className="relative">
 										<input
 											ref={inputRef}
 											type="text"
 											value={searchQuery}
 											onChange={handleSearchInputChange}
-											onFocus={handleSearchFocus}
+											onFocus={() => {
+												setIsSearchOpen(true);
+												setIsSearchFocused(true);
+											}}
 											placeholder="Search movies, TV shows, actors..."
 											className="w-full input-field pl-10 pr-4"
 										/>
-										<Search className="absolute left-3 top-2.5 w-5 h-5 text-text-secondary" />
+
+										{/* <Search className="absolute left-3 top-2.5 w-5 h-5 text-text-secondary" /> */}
 
 										<SearchDropdown
 											isOpen={shouldShowDropdown}
@@ -172,16 +176,16 @@ const Header = () => {
 						</div>
 
 						{/* Authentication Section */}
-						{isAuthenticated && currentUser ? (
+						{isAuthenticated ? (
 							<div className="relative" ref={userMenuRef}>
 								<button
 									onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
 									className="flex items-center space-x-2 p-2 hover:bg-white/10 rounded-full transition-colors duration-300"
 								>
-									{('profilePicture' in currentUser ? currentUser.profilePicture : currentUser.user?.profilePicture) ? (
+									{(currentUser?.profilePicture) ? (
 										<img
-											src={'profilePicture' in currentUser ? currentUser.profilePicture : currentUser.user?.profilePicture}
-											alt={'fullName' in currentUser ? currentUser.fullName : currentUser.user?.fullName}
+											src={currentUser?.profilePicture}
+											alt={currentUser?.fullName}
 											className="w-8 h-8 rounded-full object-cover"
 										/>
 									) : (
@@ -189,7 +193,9 @@ const Header = () => {
 											<User className="w-4 h-4" />
 										</div>
 									)}
-									<span className="text-sm font-medium">{'fullName' in currentUser ? currentUser.fullName : currentUser.user?.fullName}</span>
+									<span className="text-sm font-medium">
+										{currentUser?.fullName}
+									</span>
 								</button>
 
 								{/* User Dropdown Menu */}
@@ -282,17 +288,18 @@ const Header = () => {
 							<Link
 								key={item.name}
 								to={item.path}
-								className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300 ${location.pathname === item.path
-									? 'text-primary bg-white/10'
-									: 'text-text hover:bg-white/10'
+								className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300 
+									${location.pathname === item.path
+										? 'text-primary bg-white/10'
+										: 'text-text hover:bg-white/10'
 									}`}
 								onClick={() => setIsMenuOpen(false)}
 							>
 								{item.name}
 							</Link>
 						))}
-						
-						{isAuthenticated && currentUser ? (
+
+						{isAuthenticated ? (
 							<>
 								<Link
 									to="/profile"

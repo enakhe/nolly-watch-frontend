@@ -5,6 +5,7 @@ import { useGetUserProfileQuery, useGetWatchlistsQuery, useCreateWatchlistMutati
 import { useGetMovieByIdQuery } from '../api/movieSlice';
 import { baseImageUrl } from '../constant';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '../app/hooks';
 
 const Profile = () => {
 	const navigate = useNavigate();
@@ -14,13 +15,16 @@ const Profile = () => {
 	const [newWatchlistName, setNewWatchlistName] = useState('');
 	const [newWatchlistDescription, setNewWatchlistDescription] = useState('');
 
+	const { user } = useAppSelector((state) => state.auth);
+
 	const { data: userProfile, isLoading: profileLoading } = useGetUserProfileQuery();
 	const { data: watchlistsData, isLoading: watchlistsLoading } = useGetWatchlistsQuery();
 	const [createWatchlist, { isLoading: creating }] = useCreateWatchlistMutation();
 	const [removeFromWatchlist] = useRemoveFromWatchlistMutation();
 
-	const user = userProfile;
 	const watchlists = watchlistsData?.watchlists || [];
+
+	console.log('User Profile:', user);
 
 	const handleCreateWatchlist = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -88,17 +92,20 @@ const Profile = () => {
 									<User className="w-12 h-12" />
 								</div>
 							)}
-							<button className="absolute bottom-0 right-0 p-2 bg-primary rounded-full hover:bg-primary/80 transition-colors">
+							<button
+								className="absolute bottom-0 right-0 p-2 bg-primary rounded-full hover:bg-primary/80 transition-colors"
+								title="Edit Profile Picture"
+							>
 								<Edit className="w-4 h-4" />
 							</button>
 						</div>
 
 						<div className="flex-grow">
-							<h1 className="text-3xl font-bold mb-2">{user.fullName}</h1>
-							<p className="text-text-secondary mb-1">@{user.username}</p>
-							<p className="text-text-secondary">{user.email}</p>
+							<h1 className="text-3xl font-bold mb-2">{user?.fullName}</h1>
+							<p className="text-text-secondary mb-1">@{user?.username}</p>
+							<p className="text-text-secondary">{user?.email}</p>
 							<p className="text-sm text-text-secondary mt-2">
-								Member since {new Date(user.createdAt).toLocaleDateString()}
+								Member since {new Date(user?.createdAt).toLocaleDateString()}
 							</p>
 						</div>
 					</div>
@@ -109,8 +116,8 @@ const Profile = () => {
 					<button
 						onClick={() => setActiveTab('profile')}
 						className={`px-6 py-3 rounded-lg font-medium transition-colors ${activeTab === 'profile'
-								? 'bg-primary text-white'
-								: 'bg-white/10 hover:bg-white/20'
+							? 'bg-primary text-white'
+							: 'bg-white/10 hover:bg-white/20'
 							}`}
 					>
 						Profile Info
@@ -118,8 +125,8 @@ const Profile = () => {
 					<button
 						onClick={() => setActiveTab('watchlists')}
 						className={`px-6 py-3 rounded-lg font-medium transition-colors ${activeTab === 'watchlists'
-								? 'bg-primary text-white'
-								: 'bg-white/10 hover:bg-white/20'
+							? 'bg-primary text-white'
+							: 'bg-white/10 hover:bg-white/20'
 							}`}
 					>
 						My Watchlists ({watchlists.length})
@@ -142,6 +149,8 @@ const Profile = () => {
 									value={user.fullName}
 									readOnly
 									className="w-full input-field"
+									placeholder="Full Name"
+									title="Full Name"
 								/>
 							</div>
 							<div>
@@ -156,6 +165,7 @@ const Profile = () => {
 							<div>
 								<label className="block text-sm font-medium mb-2">Email</label>
 								<input
+									placeholder="Email Address"
 									type="email"
 									value={user.email}
 									readOnly
@@ -228,8 +238,8 @@ const Profile = () => {
 													key={watchlist._id}
 													onClick={() => setSelectedWatchlist(watchlist._id)}
 													className={`w-full text-left p-3 rounded-lg transition-colors ${selectedWatchlist === watchlist._id
-															? 'bg-primary text-white'
-															: 'hover:bg-white/10'
+														? 'bg-primary text-white'
+														: 'hover:bg-white/10'
 														}`}
 												>
 													<div className="font-medium">{watchlist.name}</div>
@@ -311,9 +321,17 @@ const Profile = () => {
 	);
 };
 
+// Types
+interface Watchlist {
+	_id: string;
+	name: string;
+	description?: string;
+	movies: number[];
+}
+
 // Component to display movies in a watchlist
 const WatchlistMovies: React.FC<{
-	watchlist: any;
+	watchlist: Watchlist;
 	onRemoveMovie: (watchlistId: string, movieId: number) => void;
 }> = ({ watchlist, onRemoveMovie }) => {
 	const navigate = useNavigate();

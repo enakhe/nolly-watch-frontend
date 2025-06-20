@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 
-const baseUrl = "https://nolly-watch-backend.vercel.app/api"
+const baseUrl = "http://localhost:5000/api"
 
 export interface User {
     _id: string
@@ -25,8 +25,6 @@ export interface LoginRequest {
 }
 
 export interface AuthResponse {
-    success: boolean
-    message: string
     user: User
     token: string
 }
@@ -107,7 +105,7 @@ export const userApiSlice = createApi({
             invalidatesTags: ["User"],
         }),
 
-        getUserProfile: builder.query<{ user: User }, void>({
+        getUserProfile: builder.query<User, void>({
             query: () => '/users/get-profile',
             providesTags: ["User"],
         }),
